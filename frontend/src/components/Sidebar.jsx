@@ -39,7 +39,7 @@ export default function Sidebar({ activeTab, setActiveTab, personCount = 0 }) {
         </div>
 
         {/* Navigation Item List */}
-        <nav className="p-2 space-y-0.5">
+        <nav className="p-2 space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -48,20 +48,20 @@ export default function Sidebar({ activeTab, setActiveTab, personCount = 0 }) {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center justify-between px-2.5 py-1.5 rounded-sm text-xs transition-colors cursor-pointer ${
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-sm text-xs transition-colors cursor-pointer ${
                   isActive
-                    ? 'bg-slate-800/90 text-slate-100 font-semibold border-l-2 border-blue-500'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 font-normal'
+                    ? 'bg-slate-800/90 text-slate-100 font-medium border-l-2 border-blue-500'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900/60 font-normal border-l-2 border-transparent'
                 }`}
                 title={item.label}
               >
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <Icon className={`w-3.5 h-3.5 shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
+                  <Icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-blue-400' : 'text-slate-500'}`} />
                   <span className="hidden md:inline truncate">{item.label}</span>
                 </div>
 
                 {item.badge > 0 && (
-                  <span className="hidden md:inline-block px-1.5 py-0.2 text-[10px] font-semibold rounded bg-red-900/70 text-red-200 border border-red-800/50">
+                  <span className="hidden md:inline-block px-1.5 py-0.5 text-[10px] font-medium font-mono rounded bg-red-900/70 text-red-200 border border-red-800/50">
                     {item.badge}
                   </span>
                 )}
@@ -73,14 +73,14 @@ export default function Sidebar({ activeTab, setActiveTab, personCount = 0 }) {
 
       {/* Bottom Status Card */}
       <div className="p-2 border-t border-slate-800/80 hidden md:block">
-        <div className="p-2 rounded-sm bg-slate-900/40 border border-slate-800/60 text-[10px] space-y-1">
+        <div className="p-2.5 rounded-sm bg-slate-900/40 border border-slate-800/60 text-[10px] space-y-1.5 font-sans">
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-medium">SYSTEM STATUS:</span>
-            <span className="text-emerald-400 font-medium">ONLINE</span>
+            <span className="text-emerald-400 font-semibold font-mono">ONLINE</span>
           </div>
           <div className="flex items-center justify-between text-slate-400">
             <span className="font-medium">OPERATIONAL MODE:</span>
-            <span className="text-slate-200 font-medium">TACTICAL</span>
+            <span className="text-slate-200 font-medium font-mono">TACTICAL</span>
           </div>
         </div>
       </div>

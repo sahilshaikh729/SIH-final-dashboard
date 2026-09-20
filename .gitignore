@@ -19,3 +19,6 @@ backend/database/*.db-shm
 Thumbs.db
 .vscode/
 .idea/
+.agent/
+.cursor/
+.gemini/

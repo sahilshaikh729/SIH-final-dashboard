@@ -4,9 +4,9 @@ const http = require('http');
 const TARGET_HOST = process.env.BACKEND_HOST || 'localhost';
 const TARGET_PORT = process.env.BACKEND_PORT || 5000;
 
-// Base center location for realistic disaster simulation (Pune/Western Ghats region)
-const BASE_LAT = 18.5204;
-const BASE_LNG = 73.8567;
+// Base center location for realistic disaster simulation (Remote rural Nepal region)
+const BASE_LAT = 28.1610;
+const BASE_LNG = 85.3380;
 
 const HAZARD_CLASSES = [
     { name: 'flood', defaultPriority: 'HIGH' },
@@ -28,12 +28,26 @@ function generateMockEvent(forcedHazard = null, channel = 'WIFI') {
         ? HAZARD_CLASSES.find(h => h.name === forcedHazard) || HAZARD_CLASSES[0]
         : HAZARD_CLASSES[Math.floor(Math.random() * HAZARD_CLASSES.length)];
 
-    // Random jitter around base location (+/- 0.04 deg ~ 4km)
-    const latOffset = (Math.random() - 0.5) * 0.08;
-    const lngOffset = (Math.random() - 0.5) * 0.08;
-
-    const lat = parseFloat((BASE_LAT + latOffset).toFixed(6));
-    const lng = parseFloat((BASE_LNG + lngOffset).toFixed(6));
+    let lat, lng;
+    if (hazardObj.name === 'flood') {
+        lat = 28.1575 + (Math.random() - 0.5) * 0.0020;
+        lng = 85.3410 + (Math.random() - 0.5) * 0.0020;
+    } else if (hazardObj.name === 'landslide') {
+        lat = 28.1660 + (Math.random() - 0.5) * 0.0020;
+        lng = 85.3460 + (Math.random() - 0.5) * 0.0020;
+    } else if (hazardObj.name === 'debris') {
+        lat = 28.1675 + (Math.random() - 0.5) * 0.0020;
+        lng = 85.3440 + (Math.random() - 0.5) * 0.0020;
+    } else if (hazardObj.name === 'person') {
+        lat = 28.1630 + (Math.random() - 0.5) * 0.0020;
+        lng = 85.3360 + (Math.random() - 0.5) * 0.0020;
+    } else if (hazardObj.name === 'fire') {
+        lat = 28.1645 + (Math.random() - 0.5) * 0.0020;
+        lng = 85.3400 + (Math.random() - 0.5) * 0.0020;
+    } else {
+        lat = 28.1610 + (Math.random() - 0.5) * 0.0020;
+        lng = 85.3380 + (Math.random() - 0.5) * 0.0020;
+    }
     const alt = parseFloat((30 + Math.random() * 85).toFixed(1));
 
     const confidence = parseFloat((0.68 + Math.random() * 0.30).toFixed(2));

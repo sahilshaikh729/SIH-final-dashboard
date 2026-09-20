@@ -15,6 +15,8 @@
     "bridge:lora:py": "python bridge/lora_bridge.py",
     "test:merge": "node mock/event_generator/generator.js --test-merge",
     "test:duplicate": "node mock/event_generator/generator.js --test-duplicate",
+    "test:all": "node mock/test_all_scenarios.js",
+    "sik:receiver": "node bridge/sik_receiver.js",
     "setup": "npm install && cd frontend && npm install"
   },
   "keywords": [
@@ -32,6 +34,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
+    "motion": "^13.4.0",
     "multer": "^1.4.5-lts.1",
     "serialport": "^13.0.0",
     "sqlite3": "^5.1.7",

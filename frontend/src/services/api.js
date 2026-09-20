@@ -50,10 +50,31 @@ export async function sendMockEvent(hazard = null, channel = 'WIFI') {
   const hazards = ['flood', 'smoke', 'fire', 'debris', 'landslide', 'person'];
   const selectedHazard = hazard || hazards[Math.floor(Math.random() * hazards.length)];
   
-  const lat = 18.5204 + (Math.random() - 0.5) * 0.08;
-  const lng = 73.8567 + (Math.random() - 0.5) * 0.08;
+  let lat = 28.1610;
+  let lng = 85.3380;
+
+  if (selectedHazard === 'flood') {
+    lat = 28.1575 + (Math.random() - 0.5) * 0.0020;
+    lng = 85.3410 + (Math.random() - 0.5) * 0.0020;
+  } else if (selectedHazard === 'landslide') {
+    lat = 28.1660 + (Math.random() - 0.5) * 0.0020;
+    lng = 85.3460 + (Math.random() - 0.5) * 0.0020;
+  } else if (selectedHazard === 'debris') {
+    lat = 28.1675 + (Math.random() - 0.5) * 0.0020;
+    lng = 85.3440 + (Math.random() - 0.5) * 0.0020;
+  } else if (selectedHazard === 'person') {
+    lat = 28.1630 + (Math.random() - 0.5) * 0.0020;
+    lng = 85.3360 + (Math.random() - 0.5) * 0.0020;
+  } else if (selectedHazard === 'fire') {
+    lat = 28.1645 + (Math.random() - 0.5) * 0.0020;
+    lng = 85.3400 + (Math.random() - 0.5) * 0.0020;
+  } else {
+    lat = 28.1610 + (Math.random() - 0.5) * 0.0020;
+    lng = 85.3380 + (Math.random() - 0.5) * 0.0020;
+  }
+
   const confidence = parseFloat((0.70 + Math.random() * 0.28).toFixed(2));
-  const priority = ['fire', 'landslide', 'person'].includes(selectedHazard) ? 'HIGH' : 'MEDIUM';
+  const priority = ['fire', 'landslide', 'person', 'flood'].includes(selectedHazard) ? 'HIGH' : 'MEDIUM';
 
   const mockPayload = {
     event_id: `EVT-${Date.now().toString().slice(-5)}`,

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import Header from './components/Header';
-import Sidebar from './components/Sidebar';
 import EventMap from './components/EventMap';
 import DetectionsSidebar from './components/DetectionsSidebar';
 import PriorityPanel from './components/PriorityPanel';
@@ -11,11 +10,17 @@ import SystemStatusBar from './components/SystemStatusBar';
 import EvidenceModal from './components/EvidenceModal';
 import ReceiverStatus from './components/ReceiverStatus';
 import MissionHistory from './components/MissionHistory';
+import StartupSplash from './components/StartupSplash';
 
 import { fetchEvents, fetchStats, updateEventStatus, sendMockEvent, fetchHealth } from './services/api';
 import { wsClient } from './services/websocket';
+import LandingPage from './components/LandingPage';
+import ErrorBoundary from './components/ErrorBoundary';
+import DroneMonitor from './components/DroneMonitor';
+import DroneCursor from './components/DroneCursor';
 
 export default function App() {
+  const [showLandingPage, setShowLandingPage] = useState(true);
   const [events, setEvents] = useState([]);
   const [stats, setStats] = useState({ total_events: 0, active_high_priority: 0, hazard_breakdown: {}, channel_breakdown: {} });
   const [healthData, setHealthData] = useState(null);
@@ -29,10 +34,35 @@ export default function App() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isOnline, setIsOnline] = useState(navigator.onLine);
 
+  // Global Dark/Light Theme State with LocalStorage Persistence (Defaults to 'dark')
+  const [theme, setTheme] = useState(() => {
+    try {
+      const saved = localStorage.getItem('ground_station_theme') || localStorage.getItem('theme');
+      return saved || 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+
+  // Sync Theme attribute on documentElement
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    try {
+      localStorage.setItem('ground_station_theme', theme);
+      localStorage.setItem('theme', theme);
+    } catch (e) {
+      console.warn('LocalStorage unavailable for theme persistence:', e);
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
+
   // Drone Telemetry Position State (simulated or real from health API/WebSocket)
   const [dronePosition, setDronePosition] = useState({
-    latitude: 27.7172,
-    longitude: 85.3240,
+    latitude: 28.1610,
+    longitude: 85.3380,
     altitude: 45.0,
     heading: 45,
     speed: 12.4,
@@ -108,8 +138,10 @@ export default function App() {
       if (msg.type === 'EVENT_CREATED') {
         const newEvent = msg.payload;
 
-        // Prepend new event to list immediately
+        // Prepend new event to list immediately (or update if event_id already exists)
         setEvents((prev) => [newEvent, ...prev.filter(e => e.event_id !== newEvent.event_id)]);
+        setSelectedEvent((prevSelected) => (prevSelected && prevSelected.event_id === newEvent.event_id ? newEvent : prevSelected));
+        setModalEvent((prevModal) => (prevModal && prevModal.event_id === newEvent.event_id ? newEvent : prevModal));
         setLastUpdate(newEvent.timestamp || new Date().toISOString());
 
         // Refresh stats metrics
@@ -117,9 +149,8 @@ export default function App() {
       } else if (msg.type === 'EVENT_STATUS_UPDATED') {
         const updated = msg.payload;
         setEvents((prev) => prev.map(e => e.event_id === updated.event_id ? updated : e));
-        if (selectedEvent && selectedEvent.event_id === updated.event_id) {
-          setSelectedEvent(updated);
-        }
+        setSelectedEvent((prevSelected) => (prevSelected && prevSelected.event_id === updated.event_id ? updated : prevSelected));
+        setModalEvent((prevModal) => (prevModal && prevModal.event_id === updated.event_id ? updated : prevModal));
         setLastUpdate(new Date().toISOString());
         fetchStats().then(setStats).catch(() => {});
       }
@@ -130,7 +161,7 @@ export default function App() {
       unsubMessage();
       wsClient.disconnect();
     };
-  }, [selectedEvent]);
+  }, []);
 
   // Trigger Mock Detection Ingest
   const handleTriggerMock = async (channel = 'WIFI') => {
@@ -159,39 +190,58 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#090d16] text-slate-100 font-sans selection:bg-blue-600 selection:text-white">
+    <div className="min-h-screen flex flex-col bg-command-center text-slate-100 font-sans selection:bg-blue-600 selection:text-white relative overflow-hidden">
       
-      {/* Compact Sidebar Navigation */}
-      <Sidebar 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        personCount={personCount}
-      />
+      {/* Premium Mini Reconnaissance Drone Custom Cursor */}
+      <DroneCursor />
 
-      {/* Main Ground Station Work Area */}
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        
-        {/* Top Header Telemetry Status Bar */}
-        <Header
-          isConnected={isConnected}
-          soundEnabled={soundEnabled}
-          setSoundEnabled={setSoundEnabled}
-          onTriggerMock={handleTriggerMock}
-          isOnline={isOnline}
-          dronePosition={dronePosition}
-        />
+      {/* Cinematic Aerospace Drone Hero Landing View */}
+      {showLandingPage ? (
+        <ErrorBoundary onReset={() => setShowLandingPage(false)}>
+          <LandingPage
+            onLaunch={() => setShowLandingPage(false)}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            dronePosition={dronePosition}
+            isConnected={isConnected}
+            isOnline={isOnline}
+            personCount={personCount}
+          />
+        </ErrorBoundary>
+      ) : (
+        <>
+          {/* Premium Horizontal Glassmorphism Navigation Header */}
+          <Header
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            personCount={personCount}
+            events={events}
+            stats={stats}
+            isConnected={isConnected}
+            soundEnabled={soundEnabled}
+            setSoundEnabled={setSoundEnabled}
+            onTriggerMock={handleTriggerMock}
+            isOnline={isOnline}
+            dronePosition={dronePosition}
+            onOpenLanding={() => setShowLandingPage(true)}
+            theme={theme}
+            toggleTheme={toggleTheme}
+          />
 
-        {/* Content Workspace */}
-        <main className="flex-1 max-w-[1920px] w-full mx-auto p-3 flex flex-col gap-3 overflow-y-auto">
-          
-          {/* OVERVIEW WORKSPACE (3-Column Operator Layout) */}
-          {activeTab === 'dashboard' && (
-            <>
-              {/* Core 3-Column Grid: [ DETECTIONS ] | [ LIVE MAP ] | [ PRIORITY ] */}
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 h-[580px]">
+          {/* Main Ground Station Work Area */}
+          <div className="flex-1 flex flex-col min-w-0 min-h-0">
+
+            {/* Content Workspace */}
+            <main className="flex-1 max-w-[1880px] w-full mx-auto px-4 lg:px-6 py-2 flex flex-col gap-3.5 overflow-y-auto min-w-0">
+              
+              {/* OVERVIEW WORKSPACE (3-Column Operator Layout) */}
+              {activeTab === 'dashboard' && (
+                <>
+                  {/* Core 3-Column Grid: [ DETECTIONS ] | [ LIVE MAP ] | [ PRIORITY ] */}
+                  <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 h-auto lg:h-[615px] min-h-0 min-w-0">
                 
                 {/* Left Column (3 cols): DETECTIONS Category Filter Sidebar */}
-                <div className="lg:col-span-3 h-full">
+                <div className="lg:col-span-3 h-[500px] lg:h-full min-h-0">
                   <DetectionsSidebar
                     events={events}
                     mapFilter={mapFilter}
@@ -207,7 +257,7 @@ export default function App() {
                 </div>
 
                 {/* Center Column (6 cols): Dominant LIVE MAP Workspace */}
-                <div className="lg:col-span-6 h-full">
+                <div className="lg:col-span-6 h-[500px] lg:h-full min-h-0">
                   <EventMap
                     events={events.filter(e => e.status !== 'RESOLVED')}
                     selectedEvent={selectedEvent}
@@ -222,11 +272,12 @@ export default function App() {
                     }}
                     dronePosition={dronePosition}
                     isOnline={isOnline}
+                    isConnected={isConnected}
                   />
                 </div>
 
                 {/* Right Column (3 cols): PRIORITY List & Event Details Panel */}
-                <div className="lg:col-span-3 h-full">
+                <div className="lg:col-span-3 h-[500px] lg:h-full min-h-0">
                   {selectedEvent && mapFilter === 'SINGLE_EVENT' ? (
                     <SelectedDetectionPanel
                       selectedEvent={selectedEvent}
@@ -262,7 +313,7 @@ export default function App() {
               </div>
 
               {/* Bottom Workspace: ALL INCIDENT DATA Table */}
-              <div className="w-full">
+              <div className="w-full shrink-0">
                 <AllIncidentDataTable
                   events={events}
                   selectedEvent={selectedEvent}
@@ -312,6 +363,19 @@ export default function App() {
             <div className="my-2">
               <ReceiverStatus
                 healthData={healthData}
+                isConnected={isConnected}
+              />
+            </div>
+          )}
+
+          {/* DEDICATED DRONE MONITOR TELEMETRY TAB */}
+          {activeTab === 'monitor' && (
+            <div className="my-1">
+              <DroneMonitor
+                dronePosition={dronePosition}
+                isConnected={isConnected}
+                isOnline={isOnline}
+                onBackToOverview={() => setActiveTab('dashboard')}
               />
             </div>
           )}
@@ -334,6 +398,8 @@ export default function App() {
           onClose={() => setModalEvent(null)}
           onUpdateStatus={handleUpdateStatus}
         />
+      )}
+        </>
       )}
 
     </div>

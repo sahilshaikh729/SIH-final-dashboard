@@ -123,9 +123,10 @@ router.post('/events/lora', validateLoRaEvent, async (req, res, next) => {
 
 /**
  * Explicit Image Attachment Endpoint for Existing Event
+ * POST /api/events/:event_id/image
  * PATCH /api/events/:event_id/image
  */
-router.patch('/events/:event_id/image', upload.single('image'), async (req, res, next) => {
+const handleImageUpload = async (req, res, next) => {
     try {
         const eventId = req.params.event_id;
         let imagePath = req.body.image_path;
@@ -159,7 +160,10 @@ router.patch('/events/:event_id/image', upload.single('image'), async (req, res,
     } catch (err) {
         next(err);
     }
-});
+};
+
+router.post('/events/:event_id/image', upload.single('image'), handleImageUpload);
+router.patch('/events/:event_id/image', upload.single('image'), handleImageUpload);
 
 /**
  * Fetch List of Events with Filtering & Search

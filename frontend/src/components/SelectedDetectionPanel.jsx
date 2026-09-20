@@ -97,50 +97,50 @@ export default function SelectedDetectionPanel({ selectedEvent, onInspectEvidenc
       </div>
 
       {/* Detection Metadata Grid */}
-      <div className="space-y-1.5 py-2 border-t border-b border-slate-800/80 my-1 text-xs font-sans">
-        <div className="grid grid-cols-2 gap-1.5">
-          <div className="bg-slate-900/60 p-1.5 rounded-sm border border-slate-800/80">
-            <span className="text-[10px] text-slate-400 block font-medium">CONFIDENCE</span>
-            <span className="text-xs font-semibold text-slate-100 font-mono">{confPct}% Match</span>
+      <div className="space-y-2 py-2.5 border-t border-b border-slate-800/80 my-1.5 text-xs font-sans">
+        <div className="grid grid-cols-2 gap-2">
+          <div className="bg-slate-900/60 p-2 rounded-sm border border-slate-800/80">
+            <span className="text-[10px] text-slate-400 block font-medium uppercase tracking-wider font-sans">CONFIDENCE</span>
+            <span className="text-xs font-semibold text-slate-100 font-mono mt-0.5 block">{confPct}% Match</span>
           </div>
 
-          <div className="bg-slate-900/60 p-1.5 rounded-sm border border-slate-800/80">
-            <span className="text-[10px] text-slate-400 block font-medium">STATUS</span>
-            <span className={`text-xs font-semibold font-mono ${isResolved ? 'text-slate-400' : 'text-amber-400'}`}>
+          <div className="bg-slate-900/60 p-2 rounded-sm border border-slate-800/80">
+            <span className="text-[10px] text-slate-400 block font-medium uppercase tracking-wider font-sans">STATUS</span>
+            <span className={`text-xs font-semibold font-mono mt-0.5 block ${isResolved ? 'text-slate-400' : 'text-amber-400'}`}>
               {selectedEvent.status || 'UNRESOLVED'}
             </span>
           </div>
         </div>
 
-        <div className="bg-slate-900/60 p-2 rounded-sm border border-slate-800/80 font-mono text-[11px] space-y-1">
+        <div className="bg-slate-900/60 p-2.5 rounded-sm border border-slate-800/80 text-xs space-y-1.5 font-sans">
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 flex items-center gap-1 font-sans">
-              <MapPin className="w-3 h-3 text-slate-400" /> LAT:
+            <span className="text-slate-400 flex items-center gap-1 font-medium text-[11px]">
+              <MapPin className="w-3.5 h-3.5 text-slate-400" /> LATITUDE:
             </span>
-            <span className="font-semibold text-slate-200">{selectedEvent.latitude?.toFixed(6) || 'N/A'}°</span>
+            <span className="font-semibold text-slate-200 font-mono">{selectedEvent.latitude?.toFixed(6) || 'N/A'}°</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 flex items-center gap-1 font-sans">
-              <MapPin className="w-3 h-3 text-slate-400" /> LNG:
+            <span className="text-slate-400 flex items-center gap-1 font-medium text-[11px]">
+              <MapPin className="w-3.5 h-3.5 text-slate-400" /> LONGITUDE:
             </span>
-            <span className="font-semibold text-slate-200">{selectedEvent.longitude?.toFixed(6) || 'N/A'}°</span>
+            <span className="font-semibold text-slate-200 font-mono">{selectedEvent.longitude?.toFixed(6) || 'N/A'}°</span>
           </div>
-          <div className="flex items-center justify-between pt-1 border-t border-slate-800/60">
-            <span className="text-slate-400 font-sans">TIMESTAMP:</span>
-            <span className="text-slate-300 font-semibold">{timeStr}</span>
+          <div className="flex items-center justify-between pt-1.5 border-t border-slate-800/60">
+            <span className="text-slate-400 font-medium text-[11px]">TIMESTAMP:</span>
+            <span className="text-slate-300 font-semibold font-mono">{timeStr}</span>
           </div>
           <div className="flex items-center justify-between">
-            <span className="text-slate-400 font-sans">EVENT ID:</span>
-            <span className="text-slate-300 font-semibold">{selectedEvent.event_id}</span>
+            <span className="text-slate-400 font-medium text-[11px]">EVENT ID:</span>
+            <span className="text-slate-300 font-semibold font-mono">{selectedEvent.event_id}</span>
           </div>
         </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="grid grid-cols-2 gap-2 pt-0.5">
+      <div className="grid grid-cols-2 gap-2 pt-1">
         <button
           onClick={() => onInspectEvidence(selectedEvent)}
-          className="py-1.5 px-2 rounded-sm bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs transition-colors flex items-center justify-center gap-1 border border-slate-700 cursor-pointer"
+          className="py-2 px-3 rounded-sm bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs transition-colors flex items-center justify-center gap-1.5 border border-slate-700 cursor-pointer"
         >
           <Eye className="w-3.5 h-3.5 text-slate-400" />
           <span>EVIDENCE</span>
@@ -149,12 +149,12 @@ export default function SelectedDetectionPanel({ selectedEvent, onInspectEvidenc
         {!isResolved ? (
           <button
             onClick={() => onResolve && onResolve(selectedEvent.event_id)}
-            className="py-1.5 px-2 rounded-sm bg-emerald-700 hover:bg-emerald-600 text-white font-semibold text-xs transition-colors flex items-center justify-center gap-1 border border-emerald-600 cursor-pointer"
+            className="py-2 px-3 rounded-sm bg-emerald-700 hover:bg-emerald-600 text-white font-medium text-xs transition-colors flex items-center justify-center gap-1.5 border border-emerald-600 cursor-pointer"
           >
             <span>RESOLVE</span>
           </button>
         ) : (
-          <div className="py-1.5 px-2 rounded-sm bg-slate-900 border border-slate-800 text-slate-500 font-medium text-xs flex items-center justify-center">
+          <div className="py-2 px-3 rounded-sm bg-slate-900 border border-slate-800 text-slate-500 font-medium text-xs flex items-center justify-center">
             RESOLVED
           </div>
         )}
