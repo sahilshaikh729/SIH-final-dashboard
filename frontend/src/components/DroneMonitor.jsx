@@ -14,7 +14,8 @@ import {
   ShieldAlert, 
   ArrowLeft,
   Sparkles,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Video
 } from 'lucide-react';
 import { MapContainer, TileLayer } from 'react-leaflet';
 import DroneMarker from './DroneMarker';
@@ -94,10 +95,158 @@ export default function DroneMonitor({
         </div>
       </div>
 
-      {/* 2. CORE TELEMETRY GRID: [ DRONE VISUAL + REAL-TIME TELEMETRY ] */}
+      {/* 2. TOP WORKSPACE: [ LIVE DRONE MAP ] | [ LIVE STREAM ] */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         
-        {/* Left 5 Cols: Prominent Central Drone Visualization */}
+        {/* Left Column (6 Cols): LIVE DRONE MAP */}
+        <div className="lg:col-span-6 glass-panel h-[420px] flex flex-col overflow-hidden relative shadow-2xl">
+          <BorderTrail
+            className="bg-gradient-to-l from-cyan-300 via-blue-500 to-cyan-300 shadow-[0_0_15px_#06b6d4]"
+            size={140}
+            transition={{
+              repeat: Infinity,
+              duration: 6,
+              ease: 'linear',
+            }}
+          />
+          <div className="flex items-center justify-between p-3.5 bg-[#0a1322]/80 border-b border-white/10 z-20 flex-wrap gap-2">
+            <div className="flex items-center gap-2">
+              <Globe className="w-4.5 h-4.5 text-cyan-400" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-100">
+                LIVE DRONE MAP
+              </h3>
+            </div>
+
+            <div className="flex items-center gap-3 shrink-0">
+              {/* Map Layer Switcher Control */}
+              <div className="flex items-center bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-display font-semibold">
+                <button
+                  onClick={() => setMapViewMode('STANDARD')}
+                  className={`px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                    mapViewMode === 'STANDARD'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Standard
+                </button>
+                <button
+                  onClick={() => setMapViewMode('SATELLITE')}
+                  className={`px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
+                    mapViewMode === 'SATELLITE'
+                      ? 'bg-blue-600 text-white shadow-md'
+                      : 'text-slate-300 hover:text-white'
+                  }`}
+                >
+                  <ImageIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Satellite
+                </button>
+              </div>
+
+              <span className="text-[10px] font-mono text-slate-300 bg-white/10 px-2 py-0.5 rounded-full border border-white/10 hidden sm:inline-block">
+                {lat}° N · {lng}° E
+              </span>
+            </div>
+          </div>
+
+          <div className="flex-1 w-full min-h-0 relative z-10">
+            <MapContainer
+              center={defaultCenter}
+              zoom={14}
+              scrollWheelZoom={true}
+              style={{ width: '100%', height: '100%' }}
+            >
+              <TileLayer
+                key={mapViewMode}
+                attribution={mapViewMode === 'SATELLITE' ? 'Tiles &copy; Esri' : '&copy; OpenStreetMap & CartoDB'}
+                url={
+                  mapViewMode === 'SATELLITE'
+                    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
+                    : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+                }
+                maxNativeZoom={mapViewMode === 'SATELLITE' ? 18 : 19}
+                maxZoom={20}
+              />
+              {dronePosition && typeof dronePosition.latitude === 'number' && typeof dronePosition.longitude === 'number' && (
+                <DroneMarker dronePosition={dronePosition} isConnected={isConnected} />
+              )}
+            </MapContainer>
+          </div>
+        </div>
+
+        {/* Right Column (6 Cols): DEDICATED LIVE STREAM PANEL */}
+        <div className="lg:col-span-6 glass-panel h-[420px] flex flex-col overflow-hidden relative shadow-2xl bg-[#0a1322]/90 border border-white/10">
+          <BorderTrail
+            className="bg-gradient-to-l from-red-500 via-amber-500 to-red-500 shadow-[0_0_15px_#ef4444]"
+            size={140}
+            transition={{
+              repeat: Infinity,
+              duration: 6,
+              ease: 'linear',
+            }}
+          />
+          {/* Header */}
+          <div className="flex items-center justify-between p-3.5 bg-[#0a1322]/80 border-b border-white/10 z-20 shrink-0">
+            <div className="flex items-center gap-2">
+              <Video className="w-4.5 h-4.5 text-red-400" />
+              <h3 className="text-xs font-black uppercase tracking-wider text-slate-100">
+                LIVE STREAM
+              </h3>
+            </div>
+
+            {/* Compact LIVE Indicator */}
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-red-500/15 border border-red-500/30 text-red-400 font-mono text-[11px] font-bold shadow-sm">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse shadow-[0_0_8px_#ef4444]" />
+              <span>● LIVE</span>
+            </div>
+          </div>
+
+          {/* Video Container */}
+          <div className="flex-1 w-full min-h-0 relative bg-[#060c17] flex items-center justify-center overflow-hidden">
+            {/* Ambient Background Video to eliminate harsh black sidebars */}
+            <video
+              src="/drone clip 1.mp4"
+              autoPlay
+              loop
+              muted
+              playsInline
+              aria-hidden="true"
+              className="absolute inset-0 w-full h-full object-cover blur-2xl scale-125 opacity-35 pointer-events-none"
+            />
+
+            {/* Subtle Vignette Overlay for Depth */}
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0a1322]/80 via-transparent to-[#0a1322]/60 pointer-events-none z-10" />
+
+            {/* 3:4 Portrait Viewing Frame */}
+            <div className="relative h-full max-h-full aspect-[3/4] overflow-hidden rounded-lg border border-white/15 shadow-2xl z-10 flex items-center justify-center bg-black/40">
+              <video
+                src="/drone clip 1.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                controls
+                className="w-full h-full object-cover object-center scale-[1.10] transition-transform duration-300"
+              />
+            </div>
+
+            {/* Telemetry Overlays on Video */}
+            <div className="absolute top-3 left-3 z-20 bg-slate-950/85 backdrop-blur-md border border-white/15 px-2.5 py-1 rounded-md text-[10px] font-mono text-slate-200 pointer-events-none flex items-center gap-2 shadow-lg">
+              <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-ping" />
+              <span>CAM-01 · EO/IR 1080P 60FPS</span>
+            </div>
+
+            <div className="absolute top-3 right-3 z-20 bg-slate-950/85 backdrop-blur-md border border-white/15 px-2.5 py-1 rounded-md text-[10px] font-mono text-emerald-400 pointer-events-none shadow-lg">
+              FEED: OPTICAL-LINK A
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* 3. CORE TELEMETRY GRID: [ DRONE VISUAL + REAL-TIME TELEMETRY ] */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
+        
+        {/* Left 5 Cols: Central Drone Visualization */}
         <div className="lg:col-span-5 flex flex-col gap-4">
           
           <div className="glass-panel p-6 flex flex-col items-center justify-center relative overflow-hidden min-h-[380px] shadow-2xl">
@@ -341,81 +490,7 @@ export default function DroneMonitor({
 
       </div>
 
-      {/* 3. LIVE DRONE MAP WORKSPACE */}
-      <div className="glass-panel h-[400px] flex flex-col overflow-hidden relative shadow-2xl">
-        <BorderTrail
-          className="bg-gradient-to-l from-cyan-300 via-blue-500 to-cyan-300 shadow-[0_0_15px_#06b6d4]"
-          size={140}
-          transition={{
-            repeat: Infinity,
-            duration: 6,
-            ease: 'linear',
-          }}
-        />
-        <div className="flex items-center justify-between p-3.5 bg-[#0a1322]/80 border-b border-white/10 z-20 flex-wrap gap-2">
-          <div className="flex items-center gap-2">
-            <Globe className="w-4.5 h-4.5 text-cyan-400" />
-            <h3 className="text-xs font-black uppercase tracking-wider text-slate-100">
-              DRONE-01 LIVE POSITION MAP
-            </h3>
-          </div>
-
-          <div className="flex items-center gap-3 shrink-0">
-            {/* Map Layer Switcher Control */}
-            <div className="flex items-center bg-white/5 p-0.5 rounded-lg border border-white/10 text-[11px] font-display font-semibold">
-              <button
-                onClick={() => setMapViewMode('STANDARD')}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
-                  mapViewMode === 'STANDARD'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <Globe className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Standard Map
-              </button>
-              <button
-                onClick={() => setMapViewMode('SATELLITE')}
-                className={`px-2.5 py-1 rounded-md transition-all cursor-pointer flex items-center gap-1 ${
-                  mapViewMode === 'SATELLITE'
-                    ? 'bg-blue-600 text-white shadow-md'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                <ImageIcon className="w-3.5 h-3.5 text-cyan-400 shrink-0" /> Satellite
-              </button>
-            </div>
-
-            <span className="text-[10px] font-mono text-slate-300 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/10 hidden sm:inline-block">
-              LAT: {lat}° · LNG: {lng}°
-            </span>
-          </div>
-        </div>
-
-        <div className="flex-1 w-full min-h-0 relative z-10">
-          <MapContainer
-            center={defaultCenter}
-            zoom={14}
-            scrollWheelZoom={true}
-            style={{ width: '100%', height: '100%' }}
-          >
-            <TileLayer
-              key={mapViewMode}
-              attribution={mapViewMode === 'SATELLITE' ? 'Tiles &copy; Esri' : '&copy; OpenStreetMap & CartoDB'}
-              url={
-                mapViewMode === 'SATELLITE'
-                  ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'
-                  : 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
-              }
-              maxNativeZoom={mapViewMode === 'SATELLITE' ? 18 : 19}
-              maxZoom={20}
-            />
-            {dronePosition && typeof dronePosition.latitude === 'number' && typeof dronePosition.longitude === 'number' && (
-              <DroneMarker dronePosition={dronePosition} isConnected={isConnected} />
-            )}
-          </MapContainer>
-        </div>
-      </div>
-
     </div>
   );
 }
+
